@@ -22,10 +22,12 @@
   --c-rare:      #1976D2;
   --c-epic:      #7B1FA2;
   --c-legendary: #D4A017;
+  --c-unique:    #E040FB;
   --bg-common:   #ECEFF1;
   --bg-rare:     #E3F2FD;
   --bg-epic:     #F3E5F5;
   --bg-legendary:#FFF8DC;
+  --bg-unique:   #FCE4FF;
 }
 
 body {
@@ -333,6 +335,22 @@ body {
 }
 .mystery-box:active { transform: scale(0.93) !important; }
 @keyframes boxFloat { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(1deg); } }
+.mystery-box.drum-rolling {
+  animation: drumRoll 1.55s cubic-bezier(0.2,0,0.8,1) both !important;
+}
+@keyframes drumRoll {
+  0%   { transform: scale(1)    rotate(0deg);  }
+  12%  { transform: scale(1.03) rotate(-2deg); }
+  25%  { transform: scale(1.06) rotate(3deg);  }
+  37%  { transform: scale(1.09) rotate(-4deg); }
+  50%  { transform: scale(1.11) rotate(5deg);  }
+  62%  { transform: scale(1.13) rotate(-7deg); }
+  72%  { transform: scale(1.15) rotate(7deg);  }
+  81%  { transform: scale(1.17) rotate(-9deg); }
+  89%  { transform: scale(1.19) rotate(9deg);  }
+  95%  { transform: scale(1.21) rotate(-11deg);}
+  100% { transform: scale(1.22) rotate(0deg);  }
+}
 .tap-hint {
   font-size: 0.85em;
   color: rgba(255,255,255,0.45);
@@ -367,6 +385,18 @@ body {
 .tag-new { background: #2E7D32; color: white; }
 .tag-dup { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); }
 #btnContinue {
+  margin-top: 8px; padding: 14px 40px;
+  background: white; color: var(--ink);
+  border: none; border-radius: 14px;
+  font-size: 1em; font-weight: 800; cursor: pointer;
+}
+#s-lb-reward {
+  background: #12101C;
+  color: white;
+  justify-content: center;
+  gap: 20px;
+}
+#btnLbrCollect {
   margin-top: 8px; padding: 14px 40px;
   background: white; color: var(--ink);
   border: none; border-radius: 14px;
@@ -699,6 +729,31 @@ body {
   text-align: center;
   padding: 18px 16px 28px;
 }
+
+/* ---- UNIQUE COLLECTION CARD ---- */
+.dump-card.unique-card:not(.locked) {
+  box-shadow: 0 0 0 1.5px rgba(224,64,251,0.35), 0 0 14px rgba(224,64,251,0.15);
+}
+.dump-card.unique-card.locked .dump-orb {
+  background: #FCE4FF !important;
+}
+
+/* ---- LB REWARD SCREEN ---- */
+.lb-reward-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.lb-reward-period {
+  font-size: 1em;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: 0.3px;
+}
+.lb-reward-sub {
+  font-size: 0.8em;
+  color: var(--muted);
+  margin-top: 3px;
+}
 </style>
 </head>
 <body>
@@ -783,7 +838,7 @@ body {
         <div class="settings-row-body">
           <div class="settings-row-title">Collection</div>
         </div>
-        <div class="settings-row-value" id="stgColl">0 / 12</div>
+        <div class="settings-row-value" id="stgColl">0 / 36</div>
       </div>
       <div class="settings-row">
         <div class="settings-row-icon">🎮</div>
@@ -808,6 +863,53 @@ body {
     </div>
   </div>
 
+  <div class="settings-section" style="margin-top:8px">
+    <div class="settings-section-label">Sound</div>
+    <div class="settings-card">
+      <div class="settings-row tappable" id="rowMusicToggle">
+        <div class="settings-row-icon">🎵</div>
+        <div class="settings-row-body">
+          <div class="settings-row-title">Music</div>
+        </div>
+        <div class="settings-row-value" id="stgMusicStatus">On</div>
+      </div>
+      <div class="settings-row tappable" id="rowSfxToggle">
+        <div class="settings-row-icon">🔊</div>
+        <div class="settings-row-body">
+          <div class="settings-row-title">Sound Effects</div>
+        </div>
+        <div class="settings-row-value" id="stgSfxStatus">On</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section" style="margin-top:8px">
+    <div class="settings-section-label">Testing</div>
+    <div class="settings-card">
+      <div class="settings-row tappable" id="rowEndDaily">
+        <div class="settings-row-icon">📅</div>
+        <div class="settings-row-body">
+          <div class="settings-row-title">End Daily Leaderboard</div>
+          <div class="settings-row-sub">Trigger daily reward now</div>
+        </div>
+      </div>
+      <div class="settings-row tappable" id="rowEndWeekly">
+        <div class="settings-row-icon">📆</div>
+        <div class="settings-row-body">
+          <div class="settings-row-title">End Weekly Leaderboard</div>
+          <div class="settings-row-sub">Trigger weekly reward now</div>
+        </div>
+      </div>
+      <div class="settings-row tappable" id="rowEndMonthly">
+        <div class="settings-row-icon">🗓️</div>
+        <div class="settings-row-body">
+          <div class="settings-row-title">End Monthly Leaderboard</div>
+          <div class="settings-row-sub">Trigger monthly reward now</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="settings-section" style="margin-top:8px; display:flex; flex-direction:column; gap:10px">
     <div class="settings-section-label">Danger Zone</div>
     <button class="btn-danger" id="btnWipeProfile">🗑 Wipe Profile</button>
@@ -827,7 +929,10 @@ body {
       <div class="combo-display" id="comboDisplay" style="display:none">🔥 <span id="comboCount">2</span>x COMBO</div>
     </div>
     <div class="hud-right">
-      <button class="btn-icon" id="btnMute" style="font-size:1em">🔊</button>
+      <div style="display:flex; gap:3px">
+        <button class="btn-icon" id="btnMuteMusic" style="font-size:0.8em">🎵</button>
+        <button class="btn-icon" id="btnMuteSfx"   style="font-size:0.8em">🔊</button>
+      </div>
       <div class="hud-best">Best<strong id="hudBest">0</strong></div>
     </div>
   </div>
@@ -868,6 +973,26 @@ body {
   </div>
 </div>
 
+<!-- ═══════════ LB REWARD ═══════════ -->
+<div id="s-lb-reward" class="screen">
+  <div class="lb-reward-header">
+    <div class="lb-reward-period" id="lbrPeriodLabel">🏆 Daily Leaderboard</div>
+    <div class="lb-reward-sub">Your reward has arrived!</div>
+  </div>
+  <div class="box-wrap" id="lbrBoxWrap">
+    <div class="mystery-box" id="lbrBox">🏆</div>
+    <div class="tap-hint" id="lbrHint">Tap to claim</div>
+  </div>
+  <div class="reveal-wrap" id="lbrReveal">
+    <div class="reveal-orb"    id="lbrOrb"></div>
+    <div class="reveal-rarity" id="lbrRarity"></div>
+    <div class="reveal-name"   id="lbrName"></div>
+    <div class="reveal-desc"   id="lbrDesc"></div>
+    <div class="reveal-tag"    id="lbrTag"></div>
+    <button id="btnLbrCollect">Collect ✓</button>
+  </div>
+</div>
+
 <!-- ═══════════ COLLECTION ═══════════ -->
 <div id="s-collection" class="screen">
   <div class="page-header">
@@ -876,7 +1001,7 @@ body {
   </div>
   <div class="stats-row">
     <div class="stat-card"><strong id="stCollected">0</strong><span>Collected</span></div>
-    <div class="stat-card"><strong>12</strong><span>Total</span></div>
+    <div class="stat-card"><strong id="stTotal">—</strong><span>Total</span></div>
     <div class="stat-card"><strong id="stScore">0</strong><span>Coll. Score</span></div>
   </div>
   <div class="dump-grid" id="dumpGrid"></div>
@@ -905,36 +1030,79 @@ body {
 //  DATA
 // ═══════════════════════════════════════════════════
 const DUMPLINGS = [
-  {id:1,  name:'Plain Steamer',   rarity:'common',    emoji:'🤍', color:'#F5DEB3', desc:'A humble classic.'},
-  {id:2,  name:'Chive Special',   rarity:'common',    emoji:'💚', color:'#A8D8A8', desc:'Smells like a garden.'},
-  {id:3,  name:'Sesame Bun',      rarity:'common',    emoji:'🤎', color:'#DEB887', desc:'Topped with sesame.'},
-  {id:4,  name:'Red Bean Puff',   rarity:'common',    emoji:'❤️', color:'#E8A0A0', desc:'Sweet surprise inside.'},
-  {id:5,  name:'Ginger Root',     rarity:'common',    emoji:'💛', color:'#FFD580', desc:'Zesty and golden.'},
-  {id:6,  name:'Truffle Cloud',   rarity:'rare',      emoji:'💜', color:'#C5A0E0', desc:'A rare treat.'},
-  {id:7,  name:'Dragon Beard',    rarity:'rare',      emoji:'💙', color:'#90B8E8', desc:'Threads of mystery.'},
-  {id:8,  name:'Sakura Bun',      rarity:'rare',      emoji:'🩷', color:'#FFAEC8', desc:'Cherry blossom filling.'},
-  {id:9,  name:'Matcha Mochi',    rarity:'rare',      emoji:'🍵', color:'#7DC8A0', desc:'Green tea goodness.'},
-  {id:10, name:'Gold Nugget',     rarity:'epic',      emoji:'🧡', color:'#FFB830', desc:'Worth its weight.'},
-  {id:11, name:'Galaxy Fold',     rarity:'epic',      emoji:'🔮', color:'#B080D8', desc:'From another dimension.'},
-  {id:12, name:'Rose Gold Glitter',rarity:'legendary',emoji:'✨', color:'#FF82B8', desc:'The rarest of them all.'},
+  // ── Common (15) ──────────────────────────────────
+  {id:1,  name:'Plain Steamer',      rarity:'common',    emoji:'🤍', color:'#F5DEB3', desc:'A humble classic.'},
+  {id:2,  name:'Chive Special',      rarity:'common',    emoji:'💚', color:'#A8D8A8', desc:'Smells like a garden.'},
+  {id:3,  name:'Sesame Bun',         rarity:'common',    emoji:'🤎', color:'#DEB887', desc:'Topped with sesame.'},
+  {id:4,  name:'Red Bean Puff',      rarity:'common',    emoji:'❤️', color:'#E8A0A0', desc:'Sweet surprise inside.'},
+  {id:5,  name:'Ginger Root',        rarity:'common',    emoji:'💛', color:'#FFD580', desc:'Zesty and golden.'},
+  {id:6,  name:'Pork & Cabbage',     rarity:'common',    emoji:'🥬', color:'#B8E0B0', desc:'The eternal crowd-pleaser.'},
+  {id:7,  name:'Shrimp Har Gow',     rarity:'common',    emoji:'🦐', color:'#FFCBA4', desc:'Translucent and tender.'},
+  {id:8,  name:'Scallion Pancake',   rarity:'common',    emoji:'🌿', color:'#C8E6C0', desc:'Flaky, fragrant, perfect.'},
+  {id:9,  name:'Taro Puff',          rarity:'common',    emoji:'🟣', color:'#D4B8E8', desc:'Purple and impossibly flaky.'},
+  {id:10, name:'Pumpkin Dumpling',   rarity:'common',    emoji:'🎃', color:'#FFD090', desc:'Golden pumpkin sweetness.'},
+  {id:11, name:'Carrot Bun',         rarity:'common',    emoji:'🥕', color:'#FFB870', desc:'Bright as a harvest day.'},
+  {id:12, name:'Peanut Mochi',       rarity:'common',    emoji:'🥜', color:'#D4A870', desc:'Chewy with a nutty crunch.'},
+  {id:13, name:'Char Siu Bao',       rarity:'common',    emoji:'🐷', color:'#FFB8A0', desc:'Fluffy BBQ pork bun.'},
+  {id:14, name:'Corn Dumpling',      rarity:'common',    emoji:'🌽', color:'#FFE880', desc:'Sweet kernel surprise.'},
+  {id:15, name:'Wonton Knot',        rarity:'common',    emoji:'🎀', color:'#F0D8C0', desc:'Tied with care.'},
+  // ── Rare (12) ────────────────────────────────────
+  {id:16, name:'Truffle Cloud',      rarity:'rare',      emoji:'💜', color:'#C5A0E0', desc:'A rare treat.'},
+  {id:17, name:'Dragon Beard',       rarity:'rare',      emoji:'💙', color:'#90B8E8', desc:'Threads of mystery.'},
+  {id:18, name:'Sakura Bun',         rarity:'rare',      emoji:'🩷', color:'#FFAEC8', desc:'Cherry blossom filling.'},
+  {id:19, name:'Matcha Mochi',       rarity:'rare',      emoji:'🍵', color:'#7DC8A0', desc:'Green tea goodness.'},
+  {id:20, name:'Spicy Sichuan',      rarity:'rare',      emoji:'🌶️', color:'#FF8060', desc:'Tongue-numbing heat.'},
+  {id:21, name:'Black Sesame Roll',  rarity:'rare',      emoji:'🖤', color:'#A09090', desc:'Dark and deeply nutty.'},
+  {id:22, name:'Lotus Leaf Wrap',    rarity:'rare',      emoji:'🍃', color:'#88C880', desc:'Steamed in lotus perfume.'},
+  {id:23, name:'Five Spice Bundle',  rarity:'rare',      emoji:'🌟', color:'#E8C870', desc:'Five spices, one destiny.'},
+  {id:24, name:'Snow Skin Moon',     rarity:'rare',      emoji:'🌙', color:'#E8E0F8', desc:'Pale as winter moonlight.'},
+  {id:25, name:'Bamboo Shoot Bun',   rarity:'rare',      emoji:'🎋', color:'#98C890', desc:'Tender spring bamboo.'},
+  {id:26, name:'Osmanthus Jelly',    rarity:'rare',      emoji:'🌸', color:'#FFD0B8', desc:'Floral and lightly sweet.'},
+  {id:27, name:'Aged Vinegar Pot',   rarity:'rare',      emoji:'🍶', color:'#C8A880', desc:'Fermented and complex.'},
+  // ── Epic (6) ─────────────────────────────────────
+  {id:28, name:'Gold Nugget',        rarity:'epic',      emoji:'🧡', color:'#FFB830', desc:'Worth its weight.'},
+  {id:29, name:'Galaxy Fold',        rarity:'epic',      emoji:'🔮', color:'#B080D8', desc:'From another dimension.'},
+  {id:30, name:'Blood Orange Burst', rarity:'epic',      emoji:'🍊', color:'#FF7040', desc:'Tart, vivid, electric.'},
+  {id:31, name:'Midnight Ink Bao',   rarity:'epic',      emoji:'🌑', color:'#606080', desc:'Dark as a moonless night.'},
+  {id:32, name:'Jade Phoenix',       rarity:'epic',      emoji:'🐉', color:'#60C890', desc:'Reborn in jade fire.'},
+  {id:33, name:'Crimson Velvet',     rarity:'epic',      emoji:'🔴', color:'#C83040', desc:'Velvet-soft, intensely red.'},
+  // ── Legendary (3) ────────────────────────────────
+  {id:34, name:'Rose Gold Glitter',  rarity:'legendary', emoji:'✨', color:'#FF82B8', desc:'The rarest of them all.'},
+  {id:35, name:'Celestial Pearl',    rarity:'legendary', emoji:'🌠', color:'#A0C8FF', desc:'Formed in deep ocean light.'},
+  {id:36, name:'Ancient Dragon Seal',rarity:'legendary', emoji:'👑', color:'#D4A830', desc:'Sealed by the last emperor.'},
+  // ── Unique — leaderboard exclusive (6) ───────────
+  {id:37, name:'Aurora Fold',        rarity:'unique', source:'daily',   emoji:'🌄', color:'#E040FB', desc:'Seen only at first light.'},
+  {id:38, name:'Dewdrop Bun',        rarity:'unique', source:'daily',   emoji:'💧', color:'#E040FB', desc:'Fresh as morning dew.'},
+  {id:39, name:'Lunar Jade',         rarity:'unique', source:'weekly',  emoji:'🌕', color:'#E040FB', desc:'Blessed by moonlight.'},
+  {id:40, name:'Crimson Lantern',    rarity:'unique', source:'weekly',  emoji:'🏮', color:'#E040FB', desc:'Lit just once a week.'},
+  {id:41, name:'Sovereign Seal',     rarity:'unique', source:'monthly', emoji:'🐲', color:'#E040FB', desc:'Stamped by the emperor.'},
+  {id:42, name:'Eternal Lotus',      rarity:'unique', source:'monthly', emoji:'🪷', color:'#E040FB', desc:'Blooms once in a lifetime.'},
 ];
 
 const RARITY = {
-  common:    { label:'Common',      score:1,  color:'#78909C', bg:'#ECEFF1', timerMs: 30*60*1000,        timerLabel:'30m' },
-  rare:      { label:'Rare',        score:3,  color:'#1976D2', bg:'#E3F2FD', timerMs: 2*60*60*1000,      timerLabel:'2h'  },
-  epic:      { label:'Epic',        score:8,  color:'#7B1FA2', bg:'#F3E5F5', timerMs: 8*60*60*1000,      timerLabel:'8h'  },
-  legendary: { label:'★ Legendary', score:25, color:'#D4A017', bg:'#FFF8DC', timerMs: 24*60*60*1000,     timerLabel:'24h' },
+  common:    { label:'Common',      score:1,  color:'#78909C', bg:'#ECEFF1', timerMs: 30*60*1000,    timerLabel:'30m' },
+  rare:      { label:'Rare',        score:3,  color:'#1976D2', bg:'#E3F2FD', timerMs: 2*60*60*1000,  timerLabel:'2h'  },
+  epic:      { label:'Epic',        score:8,  color:'#7B1FA2', bg:'#F3E5F5', timerMs: 8*60*60*1000,  timerLabel:'8h'  },
+  legendary: { label:'★ Legendary', score:25, color:'#D4A017', bg:'#FFF8DC', timerMs: 24*60*60*1000, timerLabel:'24h' },
+  unique:    { label:'◆ Unique',    score:50, color:'#E040FB', bg:'#FCE4FF', timerMs: 0,             timerLabel:''    },
 };
 
 // Testing timers — 10 seconds each:
 RARITY.common.timerMs = 10000; RARITY.rare.timerMs = 10000; RARITY.epic.timerMs = 10000; RARITY.legendary.timerMs = 10000;
 
 const TIERS = [
-  {key:'bronze',  min:1,  max:4,  label:'🥉 Bronze',  probs:{common:.70,rare:.25,epic:.04,legendary:.01}},
-  {key:'silver',  min:5,  max:8,  label:'🥈 Silver',  probs:{common:.45,rare:.40,epic:.12,legendary:.03}},
-  {key:'gold',    min:9,  max:12, label:'🥇 Gold',    probs:{common:.20,rare:.40,epic:.30,legendary:.10}},
-  {key:'perfect', min:13, max:999,label:'💎 Perfect',  probs:{common:.05,rare:.30,epic:.45,legendary:.20}},
+  {key:'bronze',  min:1,  max:25, label:'🥉 Bronze',  probs:{common:.720,rare:.240,epic:.039,legendary:.001}},
+  {key:'silver',  min:26, max:50, label:'🥈 Silver',  probs:{common:.470,rare:.400,epic:.127,legendary:.003}},
+  {key:'gold',    min:51, max:75, label:'🥇 Gold',    probs:{common:.240,rare:.400,epic:.355,legendary:.005}},
+  {key:'perfect', min:76, max:999,label:'💎 Perfect',  probs:{common:.090,rare:.400,epic:.500,legendary:.010}},
 ];
+
+// Leaderboard reward boxes — no Common, Unique is period-exclusive
+const LBBOX = {
+  daily:   { label:'Daily',   probs:{unique:.05,legendary:.05,epic:.30,rare:.60},        uniques:[37,38] },
+  weekly:  { label:'Weekly',  probs:{unique:.30,legendary:.10,epic:.35,rare:.25},        uniques:[39,40] },
+  monthly: { label:'Monthly', probs:{unique:.50,legendary:.25,epic:.25,rare:.00},        uniques:[41,42] },
+};
 
 const BOTS = [
   {name:'SteamQueen',    d:31,w:87,m:310, coll:9},
@@ -955,7 +1123,7 @@ const BOTS = [
 const LS = 'dd_v1';
 function load() {
   try { const r = localStorage.getItem(LS); if (r) return JSON.parse(r); } catch(e){}
-  return { best:0, collection:{}, slots:[], name:'', gamesPlayed:0 };
+  return { best:0, collection:{}, slots:[], name:'', gamesPlayed:0, musicMuted:false, sfxMuted:false };
 }
 function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){} }
 let S = load();
@@ -1071,9 +1239,12 @@ function openSlot(i) {
 }
 
 let _pendingRarity = null;
+let _boxTapped = false;
 
 function showBoxOpen(rarity) {
+  stopMusic();
   _pendingRarity = rarity;
+  _boxTapped = false;
   go('s-boxopen');
   const colors = {
     common:    'linear-gradient(135deg, #78909C, #546E7A)',
@@ -1081,11 +1252,14 @@ function showBoxOpen(rarity) {
     epic:      'linear-gradient(135deg, #7B1FA2, #4A148C)',
     legendary: 'linear-gradient(135deg, #D4A017, #E65100)',
   };
-  document.getElementById('mysteryBox').style.background   = colors[rarity];
-  document.getElementById('mysteryBox').style.display      = 'flex';
-  document.getElementById('tapHint').style.display         = 'block';
-  document.getElementById('revealWrap').style.display      = 'none';
-  document.querySelector('.box-wrap').style.display        = 'flex';
+  const box = document.getElementById('mysteryBox');
+  box.style.background = colors[rarity];
+  box.style.display    = 'flex';
+  box.classList.remove('drum-rolling');
+  document.getElementById('tapHint').style.display    = 'block';
+  document.getElementById('tapHint').textContent      = 'Tap to open!';
+  document.getElementById('revealWrap').style.display = 'none';
+  document.querySelector('.box-wrap').style.display   = 'flex';
 }
 
 function doReveal() {
@@ -1113,12 +1287,23 @@ function doReveal() {
   if (isNew) { tag.textContent = '✨ New!'; tag.className = 'reveal-tag tag-new'; }
   else { tag.textContent = `×${S.collection[d.id]} (Duplicate)`; tag.className = 'reveal-tag tag-dup'; }
 
-  if (rarity === 'epic' || rarity === 'legendary') burst(ri.color, rarity === 'legendary' ? 70 : 35);
+  burstBox(rarity, ri);
   sndReveal(rarity);
 }
 
-document.getElementById('mysteryBox').addEventListener('click', doReveal);
-document.getElementById('mysteryBox').addEventListener('touchstart', e => { e.preventDefault(); doReveal(); }, {passive:false});
+function startDrumRoll() {
+  if (_boxTapped) return;
+  _boxTapped = true;
+  haptic([20, 10, 15, 10, 20]);
+  const box  = document.getElementById('mysteryBox');
+  const hint = document.getElementById('tapHint');
+  box.classList.add('drum-rolling');
+  hint.textContent = '...';
+  sndDrumRoll(() => doReveal());
+}
+
+document.getElementById('mysteryBox').addEventListener('click', startDrumRoll);
+document.getElementById('mysteryBox').addEventListener('touchstart', e => { e.preventDefault(); startDrumRoll(); }, {passive:false});
 
 document.getElementById('btnContinue').addEventListener('click', () => {
   const readyIdx = S.slots.findIndex(s => Date.now() >= s.unlockAt);
@@ -1203,15 +1388,116 @@ function showRunEnd(score) {
 document.getElementById('btnHome2').addEventListener('click', () => { go('s-home'); renderHome(); });
 
 // ═══════════════════════════════════════════════════
+//  LEADERBOARD REWARDS
+// ═══════════════════════════════════════════════════
+function rollLbReward(period) {
+  const box    = LBBOX[period];
+  const rarity = rollRarity(box.probs);
+  let pool;
+  if (rarity === 'unique') {
+    pool = DUMPLINGS.filter(d => box.uniques.includes(d.id));
+  } else {
+    pool = DUMPLINGS.filter(d => d.rarity === rarity);
+  }
+  // Fallback in case pool is empty (e.g. monthly rare=0%)
+  if (!pool.length) pool = DUMPLINGS.filter(d => d.rarity === 'epic');
+  const dumpling = pool[Math.floor(Math.random() * pool.length)];
+  return { rarity, dumpling };
+}
+
+let _lbrD = null, _lbrRarity = null, _lbrTapped = false;
+
+function endLbPeriod(period) {
+  const { rarity, dumpling } = rollLbReward(period);
+  _lbrD = dumpling; _lbrRarity = rarity; _lbrTapped = false;
+  stopMusic();
+
+  const labels = { daily:'🏆 Daily Leaderboard', weekly:'🏆 Weekly Leaderboard', monthly:'🏆 Monthly Leaderboard' };
+  document.getElementById('lbrPeriodLabel').textContent = labels[period];
+
+  // Color box by rarity (same palette as regular boxes)
+  const colors = {
+    common:    'linear-gradient(135deg, #78909C, #546E7A)',
+    rare:      'linear-gradient(135deg, #1976D2, #0D47A1)',
+    epic:      'linear-gradient(135deg, #7B1FA2, #4A148C)',
+    legendary: 'linear-gradient(135deg, #D4A017, #E65100)',
+    unique:    'linear-gradient(135deg, #E040FB, #9C00D4)',
+  };
+  const box = document.getElementById('lbrBox');
+  box.style.background = colors[rarity] || colors.rare;
+  box.classList.remove('drum-rolling');
+
+  const hint = document.getElementById('lbrHint');
+  hint.textContent = 'Tap to open!';
+  hint.style.display = 'block';
+
+  document.getElementById('lbrBoxWrap').style.display = 'flex';
+  document.getElementById('lbrReveal').style.display  = 'none';
+
+  go('s-lb-reward');
+}
+
+function doLbrReveal() {
+  const d      = _lbrD;
+  const rarity = _lbrRarity;
+  const ri     = RARITY[rarity];
+
+  const isNew = !S.collection[d.id];
+  S.collection[d.id] = (S.collection[d.id] || 0) + 1;
+  save();
+
+  document.getElementById('lbrBoxWrap').style.display = 'none';
+  document.getElementById('lbrReveal').style.display  = 'flex';
+
+  document.getElementById('lbrOrb').style.cssText  = `background:${ri.bg}; box-shadow:0 0 40px ${ri.color}55`;
+  document.getElementById('lbrOrb').textContent    = d.emoji;
+  document.getElementById('lbrRarity').textContent = ri.label;
+  document.getElementById('lbrRarity').style.color = ri.color;
+  document.getElementById('lbrName').textContent   = d.name;
+  document.getElementById('lbrDesc').textContent   = d.desc;
+
+  const tag = document.getElementById('lbrTag');
+  tag.textContent = isNew ? '✨ NEW!' : `×${S.collection[d.id]} (Duplicate)`;
+  tag.className   = 'reveal-tag ' + (isNew ? 'tag-new' : 'tag-dup');
+
+  const sndRarity = rarity === 'unique' ? 'legendary' : rarity;
+  burstBox(rarity, ri);
+  if (rarity === 'unique') haptic([40, 20, 60, 20, 100]);
+  sndReveal(sndRarity);
+}
+
+function startLbrDrumRoll() {
+  if (_lbrTapped || !_lbrD) return;
+  _lbrTapped = true;
+  haptic([20, 10, 15, 10, 20]);
+  const box  = document.getElementById('lbrBox');
+  const hint = document.getElementById('lbrHint');
+  box.classList.add('drum-rolling');
+  hint.textContent = '...';
+  sndDrumRoll(() => doLbrReveal());
+}
+
+document.getElementById('lbrBox').addEventListener('click', startLbrDrumRoll);
+document.getElementById('lbrBox').addEventListener('touchstart', e => { e.preventDefault(); startLbrDrumRoll(); }, {passive:false});
+
+document.getElementById('btnLbrCollect').addEventListener('click', () => { go('s-home'); renderHome(); });
+
+// Settings testing buttons
+document.getElementById('rowEndDaily').addEventListener('click',   () => endLbPeriod('daily'));
+document.getElementById('rowEndWeekly').addEventListener('click',  () => endLbPeriod('weekly'));
+document.getElementById('rowEndMonthly').addEventListener('click', () => endLbPeriod('monthly'));
+
+// ═══════════════════════════════════════════════════
 //  SETTINGS
 // ═══════════════════════════════════════════════════
 function showSettings() {
   const collected = Object.keys(S.collection).filter(k => S.collection[k] > 0).length;
   document.getElementById('stgName').textContent  = S.name || 'Player';
   document.getElementById('stgBest').textContent  = S.best;
-  document.getElementById('stgColl').textContent  = `${collected} / 12`;
+  document.getElementById('stgColl').textContent  = `${collected} / ${DUMPLINGS.length}`;
   document.getElementById('stgGames').textContent = S.gamesPlayed || 0;
-  // Reset wipe button to default state
+  updateMuteIcons();
+  // Reset wipe button
   _wipeArmed = false;
   clearTimeout(_wipeTimer);
   const btn = document.getElementById('btnWipeProfile');
@@ -1226,6 +1512,8 @@ let _wipeTimer = null;
 
 document.getElementById('btnSettingsBack').addEventListener('click', () => { go('s-home'); renderHome(); });
 document.getElementById('btnSettings').addEventListener('click', showSettings);
+document.getElementById('rowMusicToggle').addEventListener('click', toggleMusic);
+document.getElementById('rowSfxToggle').addEventListener('click', toggleSfx);
 
 // Reset best score — single tap, no confirm needed
 document.getElementById('rowResetBest').addEventListener('click', () => {
@@ -1415,16 +1703,21 @@ function showCollection() {
   const collected = Object.keys(S.collection).filter(k => S.collection[k] > 0).length;
   const score     = DUMPLINGS.reduce((s,d) => s + (S.collection[d.id] ? RARITY[d.rarity].score : 0), 0);
   document.getElementById('stCollected').textContent = collected;
+  document.getElementById('stTotal').textContent     = DUMPLINGS.length;
   document.getElementById('stScore').textContent     = score;
 
   document.getElementById('dumpGrid').innerHTML = DUMPLINGS.map(d => {
     const count  = S.collection[d.id] || 0;
     const locked = count === 0;
     const ri     = RARITY[d.rarity];
-    return `<div class="dump-card ${locked ? 'locked' : ''}" style="border-color:${locked?'transparent':ri.color+'33'}">
+    const isUniq = d.rarity === 'unique';
+    const srcLabel = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+    const orbIcon  = locked ? (isUniq ? '🏆' : '❓') : d.emoji;
+    const nameText = locked ? (isUniq ? `${srcLabel[d.source]||'LB'} Exclusive` : '???') : d.name;
+    return `<div class="dump-card ${locked ? 'locked' : ''} ${isUniq ? 'unique-card' : ''}" style="border-color:${locked?'transparent':ri.color+'33'}">
       ${count > 1 ? `<div class="dump-count">×${count}</div>` : ''}
-      <div class="dump-orb" style="background:${ri.bg}">${locked ? '❓' : d.emoji}</div>
-      <div class="dump-name">${locked ? '???' : d.name}</div>
+      <div class="dump-orb" style="background:${ri.bg}">${orbIcon}</div>
+      <div class="dump-name">${nameText}</div>
       <div><span class="dump-rarity-dot" style="background:${ri.color}"></span></div>
     </div>`;
   }).join('');
@@ -1503,6 +1796,41 @@ function burst(color, n=20, x, y) {
   }
 }
 
+// Rarity-scaled multi-wave box reveal burst
+function burstBox(rarity, ri) {
+  const c = ri.color;
+  switch (rarity) {
+    case 'common':
+      burst('#90A4AE', 18);
+      break;
+    case 'rare':
+      burst(c, 30);
+      setTimeout(() => burst('#90CAF9', 14), 140);
+      break;
+    case 'epic':
+      burst(c, 42);
+      setTimeout(() => burst('#FFD740', 20), 110);
+      setTimeout(() => burst(c, 18), 260);
+      break;
+    case 'legendary':
+      burst(c, 55);
+      setTimeout(() => burst('#FFD740', 32), 90);
+      setTimeout(() => burst('#FFFFFF', 22), 210);
+      setTimeout(() => burst(c, 28), 370);
+      break;
+    case 'unique':
+      burst(c, 70);
+      setTimeout(() => burst('#FFD740', 40), 70);
+      setTimeout(() => burst('#FFFFFF', 28), 170);
+      setTimeout(() => burst(c, 45), 290);
+      setTimeout(() => burst('#FF82B8', 35), 430);
+      setTimeout(() => burst('#FFD740', 22), 600);
+      break;
+    default:
+      burst(c, 20);
+  }
+}
+
 function tickVfx() {
   vctx.clearRect(0, 0, vfx.width, vfx.height);
   parts = parts.filter(p => p.alpha > 0.02);
@@ -1521,12 +1849,35 @@ tickVfx();
 //  SOUNDS
 // ═══════════════════════════════════════════════════
 let _actx = null;
-let _muted = false;
+let _musicMuted = S.musicMuted || false;
+let _sfxMuted   = S.sfxMuted   || false;
 
 // ── Haptics (independent of mute) ──────────────────
 function haptic(pattern) {
   if (!navigator.vibrate) return;
   navigator.vibrate(pattern);
+}
+
+function updateMuteIcons() {
+  const bm = document.getElementById('btnMuteMusic');
+  const bs = document.getElementById('btnMuteSfx');
+  if (bm) bm.textContent = _musicMuted ? '🔇' : '🎵';
+  if (bs) bs.textContent = _sfxMuted   ? '🔕' : '🔊';
+  const sm = document.getElementById('stgMusicStatus');
+  const ss = document.getElementById('stgSfxStatus');
+  if (sm) sm.textContent = _musicMuted ? 'Off' : 'On';
+  if (ss) ss.textContent = _sfxMuted   ? 'Off' : 'On';
+}
+
+function toggleMusic() {
+  _musicMuted = !_musicMuted;
+  S.musicMuted = _musicMuted; save();
+  updateMuteIcons();
+}
+function toggleSfx() {
+  _sfxMuted = !_sfxMuted;
+  S.sfxMuted = _sfxMuted; save();
+  updateMuteIcons();
 }
 
 function _ac() {
@@ -1535,14 +1886,9 @@ function _ac() {
   return _actx;
 }
 
-function toggleMute() {
-  _muted = !_muted;
-  document.getElementById('btnMute').textContent = _muted ? '🔇' : '🔊';
-}
-
 function sndLand() {
   haptic(18);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac(), t = c.currentTime;
   const o = c.createOscillator(), g = c.createGain();
   o.connect(g); g.connect(c.destination);
@@ -1556,7 +1902,7 @@ function sndLand() {
 
 function sndPerfect() {
   haptic([22, 12, 45]);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac(), t = c.currentTime;
   [880, 1100, 1320].forEach((f, i) => {
     const o = c.createOscillator(), g = c.createGain();
@@ -1572,7 +1918,7 @@ function sndPerfect() {
 
 function sndMiss() {
   haptic([70, 30, 90]);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac(), t = c.currentTime;
   const o = c.createOscillator(), g = c.createGain();
   o.connect(g); g.connect(c.destination);
@@ -1586,7 +1932,7 @@ function sndMiss() {
 
 function sndBoxEarned() {
   haptic([35, 25, 35, 25, 70]);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac();
   [440, 550, 660].forEach((f, i) => {
     const st = c.currentTime + i * 0.11;
@@ -1602,7 +1948,7 @@ function sndBoxEarned() {
 
 function sndBoxTap() {
   haptic(22);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac(), t = c.currentTime;
   const o = c.createOscillator(), g = c.createGain();
   o.connect(g); g.connect(c.destination);
@@ -1619,7 +1965,7 @@ function sndReveal(rarity) {
     common: 20, rare: [25, 15, 40], epic: [30, 15, 45, 20, 65], legendary: [40, 20, 60, 25, 80, 30, 120]
   };
   haptic(hapticByRarity[rarity] || 20);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac(), t = c.currentTime;
   const seqs = {
     common:    [[523, 0]],
@@ -1639,11 +1985,12 @@ function sndReveal(rarity) {
   });
 }
 
-document.getElementById('btnMute').addEventListener('click', toggleMute);
+document.getElementById('btnMuteMusic').addEventListener('click', toggleMusic);
+document.getElementById('btnMuteSfx').addEventListener('click', toggleSfx);
 
 function sndNewBest() {
   haptic([30, 15, 30, 15, 80]);
-  if (_muted) return;
+  if (_sfxMuted) return;
   const c = _ac(), t = c.currentTime;
   // Rising arpeggio — C major pentatonic up two octaves
   [[523,0],[659,.09],[784,.18],[988,.27],[1047,.37],[1319,.48],[1568,.60]].forEach(([f,d],i) => {
@@ -1671,6 +2018,48 @@ function sndNewBest() {
   });
 }
 
+function sndDrumRoll(onDone) {
+  if (_sfxMuted) { setTimeout(onDone, 200); return; }
+  const c = _ac();
+  const t = c.currentTime;
+  const total = 1.55;
+  // Accelerating snare hits
+  let elapsed = 0, interval = 0.24;
+  while (elapsed < total - 0.05) {
+    const st = t + elapsed;
+    const progress = elapsed / total;
+    // White noise burst (snare-ish)
+    const bufLen = Math.floor(c.sampleRate * 0.055);
+    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const filt = c.createBiquadFilter(); filt.type = 'bandpass';
+    filt.frequency.value = 2200 + progress * 1200;
+    filt.Q.value = 1.2;
+    const gn = c.createGain();
+    gn.gain.setValueAtTime(0.10 + progress * 0.22, st);
+    gn.gain.exponentialRampToValueAtTime(0.001, st + 0.055);
+    src.connect(filt); filt.connect(gn); gn.connect(c.destination);
+    src.start(st); src.stop(st + 0.06);
+    elapsed += interval;
+    interval = Math.max(0.048, interval * 0.87);
+  }
+  // Final cymbal crash
+  const cst = t + total;
+  const cBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.35), c.sampleRate);
+  const cData = cBuf.getChannelData(0);
+  for (let i = 0; i < cData.length; i++) cData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (c.sampleRate * 0.08));
+  const cSrc = c.createBufferSource(); cSrc.buffer = cBuf;
+  const cFilt = c.createBiquadFilter(); cFilt.type = 'highpass'; cFilt.frequency.value = 4000;
+  const cGn = c.createGain();
+  cGn.gain.setValueAtTime(0.55, cst);
+  cGn.gain.exponentialRampToValueAtTime(0.001, cst + 0.35);
+  cSrc.connect(cFilt); cFilt.connect(cGn); cGn.connect(c.destination);
+  cSrc.start(cst); cSrc.stop(cst + 0.36);
+  setTimeout(onDone, (total + 0.1) * 1000);
+}
+
 // ═══════════════════════════════════════════════════
 //  MUSIC
 // ═══════════════════════════════════════════════════
@@ -1694,7 +2083,7 @@ const LOBBY_MELODY = [523, 659, 784, 659, 523, 440, 392, 440];
 const GAME_MELODY  = [261, 329, 261, 392, 329, 261, 220, 261];
 
 function _pad(freqs, dur, vol) {
-  if (_muted) return;
+  if (_musicMuted) return;
   const c = _ac();
   freqs.forEach(f => {
     const o = c.createOscillator(), g = c.createGain();
@@ -1710,7 +2099,7 @@ function _pad(freqs, dur, vol) {
 }
 
 function _note(freq, dur, vol) {
-  if (_muted) return;
+  if (_musicMuted) return;
   const c = _ac();
   const o = c.createOscillator(), g = c.createGain();
   o.connect(g); g.connect(c.destination);
@@ -1935,7 +2324,7 @@ function gUpdate(dt) {
         if (falling.perfect) {
           const r = gc.getBoundingClientRect();
           const sx = r.left + falling.x * (r.width / CW);
-          const sy = r.top  + falling.y * (r.height / CH);
+          const sy = r.top  + (falling.y + camOffset) * (r.height / CH);
 
           // ── Combo milestones ──
           const MILESTONES = [3, 5, 10, 15, 20];
