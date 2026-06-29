@@ -2625,7 +2625,7 @@ function _makePWAIcon(size) {
 (function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-const CACHE = 'dd-v2';
+const CACHE = 'dd-20260629-1705';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(clients.claim());
