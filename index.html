@@ -503,6 +503,29 @@ body {
 }
 .period-btn.active { background: var(--red); border-color: var(--red); color: white; }
 
+.lb-countdown {
+  display: flex; align-items: center; justify-content: center;
+  gap: 7px;
+  width: 100%; max-width: 400px;
+  padding: 9px 16px;
+  margin: 0 16px 12px;
+  background: var(--card);
+  border-radius: 12px;
+  font-size: 0.82em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.lb-countdown .lbc-icon  { font-size: 1em; }
+.lb-countdown .lbc-label { color: var(--muted); font-weight: 600; }
+.lb-countdown .lbc-time  { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.home-countdown {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.72em; font-weight: 700;
+  color: var(--muted);
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
 .lb-table {
   width: 100%; max-width: 400px;
   background: var(--card); border-radius: 16px;
@@ -803,7 +826,7 @@ body {
       <button class="btn-nav" id="btnLeaderboard">🏆 Rankings</button>
     </div>
     <div class="lb-preview">
-      <div class="section-label">🔥 Top Players Today</div>
+      <div class="section-label">🔥 Top Players Today<span class="home-countdown" id="homeCountdown">⏳ —</span></div>
       <div id="homeLb"></div>
     </div>
   </div>
@@ -977,7 +1000,7 @@ body {
 <div id="s-lb-reward" class="screen">
   <div class="lb-reward-header">
     <div class="lb-reward-period" id="lbrPeriodLabel">🏆 Daily Leaderboard</div>
-    <div class="lb-reward-sub">Your reward has arrived!</div>
+    <div class="lb-reward-sub" id="lbrSub">Your reward has arrived!</div>
   </div>
   <div class="box-wrap" id="lbrBoxWrap">
     <div class="mystery-box" id="lbrBox">🏆</div>
@@ -1021,6 +1044,11 @@ body {
     <button class="period-btn active" data-period="daily">Daily</button>
     <button class="period-btn"        data-period="weekly">Weekly</button>
     <button class="period-btn"        data-period="monthly">Monthly</button>
+  </div>
+  <div class="lb-countdown" id="lbCountdown">
+    <span class="lbc-icon">⏳</span>
+    <span class="lbc-label">Resets in</span>
+    <span class="lbc-time" id="lbcTime">—</span>
   </div>
   <div class="lb-table" id="lbTable"></div>
 </div>
@@ -1102,6 +1130,42 @@ const LBBOX = {
   daily:   { label:'Daily',   probs:{unique:.05,legendary:.05,epic:.30,rare:.60},        uniques:[37,38] },
   weekly:  { label:'Weekly',  probs:{unique:.30,legendary:.10,epic:.35,rare:.25},        uniques:[39,40] },
   monthly: { label:'Monthly', probs:{unique:.50,legendary:.25,epic:.25,rare:.00},        uniques:[41,42] },
+};
+
+// Rank-based reward brackets per leaderboard period.
+// 'special' brackets roll against a custom probs table (with Unique access).
+// 'gameplay' brackets roll a regular gameplay box of the named tier (no Unique).
+const REWARD_TIERS = {
+  daily: {
+    field: 20,
+    brackets: [
+      { max:1,  type:'special',  probs:{unique:.05, legendary:.05, epic:.30, rare:.60}, label:'🏆 Champion' },
+      { max:3,  type:'special',  probs:{unique:.02, legendary:.04, epic:.32, rare:.62}, label:'🥈 Podium' },
+      { max:10, type:'gameplay', tier:'silver', label:'🥉 Top 10' },
+      { max:20, type:'gameplay', tier:'bronze', label:'Participant' },
+    ],
+  },
+  weekly: {
+    field: 50,
+    brackets: [
+      { max:1,  type:'special',  probs:{unique:.30, legendary:.10, epic:.35, rare:.25}, label:'🏆 Champion' },
+      { max:3,  type:'special',  probs:{unique:.15, legendary:.08, epic:.40, rare:.37}, label:'🥈 Podium' },
+      { max:10, type:'special',  probs:{unique:.03, legendary:.05, epic:.37, rare:.55}, label:'🥉 Top 10' },
+      { max:25, type:'gameplay', tier:'gold',   label:'Top 25' },
+      { max:50, type:'gameplay', tier:'silver', label:'Participant' },
+    ],
+  },
+  monthly: {
+    field: 100,
+    brackets: [
+      { max:1,   type:'special',  probs:{unique:.50, legendary:.25, epic:.25, rare:.00}, label:'🏆 Champion' },
+      { max:3,   type:'special',  probs:{unique:.38, legendary:.22, epic:.35, rare:.05}, label:'🥈 Podium' },
+      { max:10,  type:'special',  probs:{unique:.25, legendary:.20, epic:.45, rare:.10}, label:'🥉 Top 10' },
+      { max:25,  type:'special',  probs:{unique:.05, legendary:.12, epic:.53, rare:.30}, label:'Top 25' },
+      { max:50,  type:'gameplay', tier:'perfect', label:'Top 50' },
+      { max:100, type:'gameplay', tier:'gold',    label:'Participant' },
+    ],
+  },
 };
 
 const BOTS = [
@@ -1390,30 +1454,50 @@ document.getElementById('btnHome2').addEventListener('click', () => { go('s-home
 // ═══════════════════════════════════════════════════
 //  LEADERBOARD REWARDS
 // ═══════════════════════════════════════════════════
-function rollLbReward(period) {
-  const box    = LBBOX[period];
-  const rarity = rollRarity(box.probs);
-  let pool;
-  if (rarity === 'unique') {
-    pool = DUMPLINGS.filter(d => box.uniques.includes(d.id));
+// Scales the player's rank in the (small, simulated) bot leaderboard up to
+// the announced field size for that period, so reward brackets feel correct
+// even though we only have a handful of bots to compare against right now.
+function getScaledRank(period) {
+  const data  = lbData(period);
+  const idx   = data.findIndex(p => p.me);
+  const rank  = idx + 1;
+  const total = data.length;
+  const field = REWARD_TIERS[period].field;
+  return Math.max(1, Math.min(field, Math.ceil(rank / total * field)));
+}
+
+function rollLbReward(period, rank) {
+  const cfg     = REWARD_TIERS[period];
+  const bracket = cfg.brackets.find(b => rank <= b.max);
+  let rarity, pool;
+
+  if (bracket.type === 'special') {
+    rarity = rollRarity(bracket.probs);
+    pool = rarity === 'unique'
+      ? DUMPLINGS.filter(d => LBBOX[period].uniques.includes(d.id))
+      : DUMPLINGS.filter(d => d.rarity === rarity);
   } else {
+    const tierDef = TIERS.find(t => t.key === bracket.tier);
+    rarity = rollRarity(tierDef.probs);
     pool = DUMPLINGS.filter(d => d.rarity === rarity);
   }
-  // Fallback in case pool is empty (e.g. monthly rare=0%)
   if (!pool.length) pool = DUMPLINGS.filter(d => d.rarity === 'epic');
   const dumpling = pool[Math.floor(Math.random() * pool.length)];
-  return { rarity, dumpling };
+  return { rarity, dumpling, bracket };
 }
 
 let _lbrD = null, _lbrRarity = null, _lbrTapped = false;
 
 function endLbPeriod(period) {
-  const { rarity, dumpling } = rollLbReward(period);
+  const rank = getScaledRank(period);
+  const { rarity, dumpling, bracket } = rollLbReward(period, rank);
   _lbrD = dumpling; _lbrRarity = rarity; _lbrTapped = false;
   stopMusic();
 
   const labels = { daily:'🏆 Daily Leaderboard', weekly:'🏆 Weekly Leaderboard', monthly:'🏆 Monthly Leaderboard' };
+  const fieldSize = REWARD_TIERS[period].field;
   document.getElementById('lbrPeriodLabel').textContent = labels[period];
+  document.getElementById('lbrSub').textContent = `Rank #${rank} of ${fieldSize} · ${bracket.label}`;
 
   // Color box by rarity (same palette as regular boxes)
   const colors = {
@@ -1749,7 +1833,8 @@ function lbCollData() {
 }
 
 function renderLb() {
-  document.getElementById('periodRow').style.display = lbTab === 'perf' ? 'flex' : 'none';
+  document.getElementById('periodRow').style.display     = lbTab === 'perf' ? 'flex' : 'none';
+  document.getElementById('lbCountdown').style.display    = lbTab === 'perf' ? 'flex' : 'none';
   const data = lbTab === 'perf' ? lbData(lbPeriod) : lbCollData();
   document.getElementById('lbTable').innerHTML = data.map((p,i) => {
     const cls = ['g1','g2','g3'][i] || '';
@@ -1761,6 +1846,7 @@ function renderLb() {
   }).join('');
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(lbTab === 'perf' ? 'tabPerf' : 'tabColl').classList.add('active');
+  updateCountdowns();
 }
 
 document.getElementById('btnLbBack').addEventListener('click', () => { go('s-home'); renderHome(); });
@@ -1775,6 +1861,57 @@ document.querySelectorAll('.period-btn').forEach(btn => {
     renderLb();
   });
 });
+
+// ── Leaderboard reset timers — all anchored to 12:00 UTC ──
+function nextDailyReset(now) {
+  let d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12, 0, 0));
+  if (d <= now) d = new Date(d.getTime() + 86400000);
+  return d;
+}
+function nextWeeklyReset(now) {
+  // Resets every Monday at 12:00 UTC
+  let d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12, 0, 0));
+  while (d <= now || d.getUTCDay() !== 1) d = new Date(d.getTime() + 86400000);
+  return d;
+}
+function nextMonthlyReset(now) {
+  // Resets on the 1st of next month at 12:00 UTC
+  let y = now.getUTCFullYear(), m = now.getUTCMonth();
+  let d = new Date(Date.UTC(y, m, 1, 12, 0, 0));
+  while (d <= now) d = new Date(Date.UTC(y, ++m, 1, 12, 0, 0));
+  return d;
+}
+const RESET_FNS = { daily: nextDailyReset, weekly: nextWeeklyReset, monthly: nextMonthlyReset };
+
+function formatCountdown(ms) {
+  if (ms <= 0) return 'now!';
+  const totalSec = Math.floor(ms / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hrs  = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+  if (days > 0)  return `${days}d ${hrs}h`;
+  if (hrs  > 0)  return `${hrs}h ${mins}m`;
+  return `${mins}m ${secs}s`;
+}
+
+function updateCountdowns() {
+  const now = new Date();
+  // Leaderboard screen chip — tied to currently selected period
+  const lbcEl = document.getElementById('lbcTime');
+  if (lbcEl && document.getElementById('s-leaderboard').classList.contains('active') && lbTab === 'perf') {
+    const target = RESET_FNS[lbPeriod](now);
+    lbcEl.textContent = formatCountdown(target - now);
+  }
+  // Home screen chip — always shows daily reset
+  const homeEl = document.getElementById('homeCountdown');
+  if (homeEl) {
+    const target = nextDailyReset(now);
+    homeEl.textContent = '⏳ ' + formatCountdown(target - now);
+  }
+}
+setInterval(updateCountdowns, 1000);
+updateCountdowns();
 
 // ═══════════════════════════════════════════════════
 //  PARTICLES
@@ -2625,7 +2762,7 @@ function _makePWAIcon(size) {
 (function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   const swCode = `
-const CACHE = 'dd-20260629-1705';
+const CACHE = 'dd-20260630-1308';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(clients.claim());
